@@ -1,0 +1,55 @@
+# frozen_string_literal: true
+
+module DearDirtyController
+  module RackResponse
+    def self.included(base)
+      base.extend ClassMethods
+      base.include InstanceMethods
+    end
+
+    module InstanceMethods
+      attr_reader :_headers, :_status, :_body
+
+      private
+
+      def headers(param)
+        @_headers = param
+      end
+
+      def content_type(param)
+        @_headers ||= {}
+        @_headers["Content-Type"] = param
+      end
+
+      def status(param)
+        @_status = param
+      end
+
+      def body(param)
+        @_body = param
+      end
+
+      def build_rack_response
+        status = @_status || 200
+        headers = (self.class._headers || {}).merge(@_headers || {})
+        body = @_body.nil? ? [] : [@_body]
+        [status, headers, body]
+      end
+    end
+
+    module ClassMethods
+      attr_reader :_headers
+
+      private
+
+      def headers(param)
+        @_headers = param
+      end
+
+      def content_type(param)
+        @_headers ||= {}
+        @_headers["Content-Type"] = param
+      end
+    end
+  end
+end
