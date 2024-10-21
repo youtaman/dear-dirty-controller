@@ -45,42 +45,4 @@ module DearDirtyController
       end
     end
   end
-
-  # class A
-  #   include DearDirtyController::Mixin
-
-  #   headers "SOME-KEY" => "SOME-VALUE"
-  #   content_type "application/json"
-
-  #   rescue_from StandardError do |error|
-  #     status 500
-  #     body "something went wrong"
-  #   end
-
-  #   rescue_all do |error|
-  #     status 501
-  #     body "something went wrong 2"
-  #   end
-
-  #   before do
-  #     @context.messages = ["before"]
-  #     puts "before"
-  #   end
-
-  #   def execute
-  #     @context.messages << "call"
-  #     puts "execute"
-  #     status 201
-  #     { a: 1 }
-  #   end
-
-  #   after do
-  #     @context.messages << "after"
-  #     puts "after"
-  #     puts @context.messages.to_s
-  #   end
-  # end
-
-  # config/routes.rbには以下のように記述する
-  # get "/a", to: DearDirtyController::A
 end
