@@ -1,14 +1,11 @@
 class PostUserController < ApplicationController
-  def execute
-    create_user
+  serializer UserSerializer
+
+  execute do
+    User.new(user_params)
   end
 
   private
-
-  def create_user
-    # User.create!(user_params)
-    user_params
-  end
 
   def user_params
     params.require(:user).permit(:first_name, :last_name)

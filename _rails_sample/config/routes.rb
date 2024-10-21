@@ -1,4 +1,4 @@
 Rails.application.routes.draw do
-  get "/current_time", to: GetCurrentTimeController
-  post "/user", to: PostUserController
+  get "/users/:id", to: GetUserController
+  post "/users", to: PostUserController
 end

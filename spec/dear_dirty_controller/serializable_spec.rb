@@ -20,7 +20,7 @@ RSpec.describe DearDirtyController::Serializable do
 
     it "sets default serializer method" do
       klass.send(:serializer, Object)
-      expect(klass.send(:_serialize_method)).to eq :serialize
+      expect(klass.send(:_serialize_method)).to eq :call
     end
   end
 
@@ -33,9 +33,9 @@ RSpec.describe DearDirtyController::Serializable do
 
   describe "#serialize" do
     Serializer = Class.new do
-      def self.serialize(execute_result); execute_result; end
+      def self.call(execute_result); execute_result; end
       def self.add_1(execute_result); execute_result + 1; end
-      def self.dummy(execute_result); raise "Should not be called"; end
+      def self.dummy(_); raise "Should not be called"; end
     end
 
     it "calls serializer block" do

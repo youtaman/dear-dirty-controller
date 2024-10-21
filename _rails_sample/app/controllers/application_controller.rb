@@ -5,23 +5,23 @@ class ApplicationController
 
   content_type "application/json"
 
-  rescue_from StandardError do |error|
+  rescue_from StandardError do |_error|
     status 500
     body "something went wrong"
   end
 
-  rescue_from ActiveRecord::RecordNotFound do |error|
+  rescue_from ActiveRecord::RecordNotFound do |_error|
     status 404
     body "record not found"
   end
 
-  rescue_all do |error|
+  rescue_all do |_error|
     status 501
     body "something went wrong"
   end
 
   def initialize(args)
-    super(args)
+    super
     @request = ActionDispatch::Request.new(args)
   end
 

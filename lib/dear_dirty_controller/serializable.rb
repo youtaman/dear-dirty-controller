@@ -32,7 +32,7 @@ module DearDirtyController
         return if klass.nil?
 
         @_serializer_class = klass
-        @_serialize_method = params[:method] || :serialize
+        @_serialize_method = params[:method] || :call
       end
 
       def serialize(&block)

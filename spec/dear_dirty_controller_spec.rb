@@ -4,7 +4,7 @@ RSpec.describe DearDirtyController do
   let(:klass) do
     Class.new do
       include DearDirtyController::Mixin
-      def execute
+      execute do
         { args: @args }
       end
     end
@@ -20,12 +20,24 @@ RSpec.describe DearDirtyController do
       end
     end
 
-  describe "#initialize" do
-    it "sets args" do
-      instance = klass.new(1, 2)
-      expect(instance.args).to eq [1, 2]
+    describe ".execute" do
+      it "defines execute method" do
+        klass2 = Class.new do
+          include DearDirtyController::Mixin
+        end
+        expect(klass2.new.methods).not_to include :execute
+
+        klass2.send(:execute) { "test" }
+        expect(klass2.new.methods).to include :execute
+      end
     end
-  end
+
+    describe "#initialize" do
+      it "sets args" do
+        instance = klass.new(1, 2)
+        expect(instance.args).to eq [1, 2]
+      end
+    end
 
     describe "#call" do
       it "runs callbacks" do
@@ -38,8 +50,8 @@ RSpec.describe DearDirtyController do
       it "sets serialized result to body" do
         instance = klass.new(1, 2)
         expect(instance).to receive(:serialize).and_return("serialized")
-        expect(instance).to receive(:body).with("serialized")
         instance.call
+        expect(instance._body).to eq "serialized"
       end
 
       it "builds rack response" do
@@ -64,15 +76,6 @@ RSpec.describe DearDirtyController do
         expect(instance).not_to receive(:execute)
         instance.call
       end
-    end
-  end
-
-  describe "#execute" do
-    it "need implement" do
-      klass = Class.new do
-        include DearDirtyController::Mixin
-      end
-      expect { klass.new.execute }.to raise_error(NotImplementedError)
     end
   end
 end

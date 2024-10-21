@@ -36,13 +36,13 @@ module DearDirtyController
       build_rack_response
     end
 
-    def execute
-      raise NotImplementedError
-    end
-
     module ClassMethods
       def call(...)
         new(...).call
+      end
+
+      def execute(&block)
+        define_method(:execute, &block)
       end
     end
   end
