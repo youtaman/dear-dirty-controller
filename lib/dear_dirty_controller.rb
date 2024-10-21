@@ -27,11 +27,12 @@ module DearDirtyController
       @context = Context.new
       begin
         run_before_callbacks
-        body serialize(execute) unless skip_execution?
+        body execute unless skip_execution?
         run_after_callbacks
       rescue => e
         try_rescue e
       end
+      body serialize(@_body)
       build_rack_response
     end
 

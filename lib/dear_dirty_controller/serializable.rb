@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "json"
 
 module DearDirtyController
@@ -11,20 +12,19 @@ module DearDirtyController
     module InstanceMethods
       private
 
-      def serialize(execute_result)
+      def serialize(value)
         if self.class._serialize_block
-          self.class._serialize_block.call(execute_result)
+          self.class._serialize_block.call(value)
         elsif self.class._serializer_class
-          self.class._serializer_class.send(self.class._serialize_method, execute_result)
+          self.class._serializer_class.send(self.class._serialize_method, value)
         else
-          execute_result.to_json
+          value.to_json
         end
       end
     end
 
     module ClassMethods
-      attr_reader :_serializer_class, :_serialize_method
-      attr_reader :_serialize_block
+      attr_reader :_serializer_class, :_serialize_method, :_serialize_block
 
       private
 

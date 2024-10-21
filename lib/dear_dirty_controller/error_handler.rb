@@ -15,17 +15,14 @@ module DearDirtyController
       block = self.class._error_handlers&.fetch(error.class, nil)
       block ||= self.class._all_error_handler
 
-      if block.nil?
-        raise error
-      else
-        instance_exec(error, &block)
-      end
+      raise error if block.nil?
+
+      instance_exec(error, &block)
     end
   end
 
   module ClassMethods
-    attr_reader :_error_handlers
-    attr_reader :_all_error_handler
+    attr_reader :_error_handlers, :_all_error_handler
 
     private
 
