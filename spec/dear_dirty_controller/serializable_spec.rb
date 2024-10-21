@@ -51,8 +51,8 @@ RSpec.describe DearDirtyController::Serializable do
       expect(klass.new.send(:serialize, 1)).to eq 2
     end
 
-    it "returns raw result if no set serializer" do
-      expect(klass.new.send(:serialize, true)).to eq true
+    it "returns json result if no set serializer" do
+      expect(klass.new.send(:serialize, true)).to eq true.to_json
     end
 
     it "prioritizes block over class" do

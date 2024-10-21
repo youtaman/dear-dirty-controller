@@ -41,6 +41,7 @@ Gem::Specification.new do |spec|
   # guide at: https://bundler.io/guides/creating_gem.html
 
   spec.add_dependency "ostruct"
+  spec.add_dependency "json"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"

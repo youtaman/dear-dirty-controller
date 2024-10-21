@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require "json"
 
 module DearDirtyController
   module Serializable
@@ -16,7 +17,7 @@ module DearDirtyController
         elsif self.class._serializer_class
           self.class._serializer_class.send(self.class._serialize_method, execute_result)
         else
-          execute_result
+          execute_result.to_json
         end
       end
     end
