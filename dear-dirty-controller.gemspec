@@ -5,38 +5,28 @@ require_relative "lib/dear_dirty_controller/version"
 Gem::Specification.new do |spec|
   spec.name = "dear-dirty-controller"
   spec.version = DearDirtyController::VERSION
-  spec.authors = ["TODO: Write your name"]
-  spec.email = ["TODO: Write your email address"]
+  spec.authors = ["youtaman"]
+  spec.email = ["akikiuv+youtaman@gmail.com"]
 
-  spec.summary = "TODO: Write a short summary, because RubyGems requires one."
-  spec.description = "TODO: Write a longer description or delete this line."
-  spec.homepage = "TODO: Put your gem's website or public repo URL here."
+  spec.summary = "dear-dirty-controller is a gem for drawing controllers in a clean and beautiful way."
+  spec.description = "dear-dirty-controller is a gem for drawing controllers in a clean and beautiful way."
+  spec.homepage = "https://github.com/youtaman/dear-dirty-controller"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.0.0"
 
   spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "TODO: Put your gem's public repo URL here."
-  spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
+  spec.metadata["source_code_uri"] = "https://github.com/youtaman/dear-dirty-controller"
+  spec.metadata["changelog_uri"] = "https://github.com/youtaman/dear-dirty-controller/blob/master/CHANGELOG.md"
   spec.metadata["rubygems_mfa_required"] = "true"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
-  # gemspec = File.basename(__FILE__)
-  # spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
-  #   ls.readlines("\x0", chomp: true).reject do |f|
-  #     (f == gemspec) ||
-  #       f.start_with?(*%w[bin/ test/ spec/ features/ .git .github appveyor Gemfile])
-  #   end
-  # end
+  spec.files = IO.popen(%w[du -a lib], chdir: __dir__, err: IO::NULL) { |ls| ls.readlines.to_a }
+                 .map { _1.split("\t").last.split("\n").first }
+                 .filter { _1.end_with? ".rb" }.to_a
   spec.bindir = "exe"
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
-
-  # Uncomment to register a new dependency of your gem
-  # spec.add_dependency "example-gem", "~> 1.0"
-
-  # For more information and examples about making a new gem, check out our
-  # guide at: https://bundler.io/guides/creating_gem.html
 end
