@@ -9,7 +9,7 @@ require_relative "dear_dirty_controller/version"
 
 module DearDirtyController
   module Mixin
-    attr_reader :context
+    attr_reader :context, :args
 
     def self.included(base)
       base.extend ClassMethods
@@ -19,8 +19,8 @@ module DearDirtyController
       base.include DearDirtyController::Serializable
     end
 
-    def initialize
-      raise NotImplementedError
+    def initialize(*args)
+      @args = args
     end
 
     def call
@@ -46,50 +46,48 @@ module DearDirtyController
     end
   end
 
-  # class A
-  #   include DearDirtyController::Mixin
+  class A
+    include DearDirtyController::Mixin
 
-  #   headers "SOME-KEY" => "SOME-VALUE"
-  #   content_type "application/json"
+    headers "SOME-KEY" => "SOME-VALUE"
+    content_type "application/json"
 
-  #   rescue_from StandardError do |error|
-  #     status 500
-  #     body "something went wrong"
-  #   end
+    rescue_from StandardError do |error|
+      status 500
+      body "something went wrong"
+    end
 
-  #   rescue_all do |error|
-  #     status 501
-  #     body "something went wrong 2"
-  #   end
+    rescue_all do |error|
+      status 501
+      body "something went wrong 2"
+    end
 
-  #   before do
-  #     @context.messages = ["before"]
-  #     puts "before"
-  #   end
+    before do
+      @context.messages = ["before"]
+      puts "before"
+    end
 
-  #   def initialize; end
+    def execute
+      @context.messages << "call"
+      puts "execute"
+      status 201
+      { a: 1 }
+    end
 
-  #   def execute
-  #     @context.messages << "call"
-  #     puts "execute"
-  #     status 201
-  #     { a: 1 }
-  #   end
+    after do
+      @context.messages << "after"
+      puts "after"
+      puts @context.messages.to_s
+    end
 
-  #   after do
-  #     @context.messages << "after"
-  #     puts "after"
-  #     puts @context.messages.to_s
-  #   end
-
-  #   serialize do |response|
-  #     array = []
-  #     response.keys.each do |key|
-  #       array << "'#{key}': '#{response[key]}'"
-  #     end
-  #     "{#{array.join(", ")}}"
-  #   end
-  # end
+    serialize do |response|
+      array = []
+      response.keys.each do |key|
+        array << "'#{key}': '#{response[key]}'"
+      end
+      "{#{array.join(", ")}}"
+    end
+  end
 
   # config/routes.rbには以下のように記述する
   # get "/a", to: DearDirtyController::A

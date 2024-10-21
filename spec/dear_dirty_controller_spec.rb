@@ -4,13 +4,8 @@ RSpec.describe DearDirtyController do
   let(:klass) do
     Class.new do
       include DearDirtyController::Mixin
-      def initialize(param1, param2)
-        @param1 = param1
-        @param2 = param2
-      end
-
       def execute
-        { param1: @param1, param2: @param2 }
+        { args: @args }
       end
     end
   end
@@ -24,6 +19,13 @@ RSpec.describe DearDirtyController do
         klass.call(1, 2)
       end
     end
+
+  describe "#initialize" do
+    it "sets args" do
+      instance = klass.new(1, 2)
+      expect(instance.args).to eq [1, 2]
+    end
+  end
 
     describe "#call" do
       it "runs callbacks" do
@@ -57,22 +59,12 @@ RSpec.describe DearDirtyController do
     end
   end
 
-  describe "#execute and #initialize" do
-    just_included_klass = Class.new do
-      include DearDirtyController::Mixin
-    end
-
+  describe "#execute" do
     it "need implement" do
-      just_included_klass = Class.new do
+      klass = Class.new do
         include DearDirtyController::Mixin
       end
-      expect { just_included_klass.new }.to raise_error(NotImplementedError)
-
-      initializable_klass = Class.new do
-        include DearDirtyController::Mixin
-        def initialize; end
-      end
-      expect { initializable_klass.new.execute }.to raise_error(NotImplementedError)
+      expect { klass.new.execute }.to raise_error(NotImplementedError)
     end
   end
 end
