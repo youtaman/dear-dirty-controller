@@ -56,6 +56,14 @@ RSpec.describe DearDirtyController do
         expect(instance).to receive(:try_rescue).with(error).and_return("rescued")
         instance.call
       end
+
+      it "does not execute if skip_execution? is true" do
+        klass.send(:before) { skip_execution! }
+        instance = klass.new(1, 2)
+
+        expect(instance).not_to receive(:execute)
+        instance.call
+      end
     end
   end
 

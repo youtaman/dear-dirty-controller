@@ -10,12 +10,22 @@ module DearDirtyController
     module InstanceMethods
       private
 
+      attr_reader :skip_execution
+
       def run_before_callbacks
         self.class._before_callbacks&.each { instance_exec(&_1) }
       end
 
       def run_after_callbacks
         self.class._after_callbacks&.each { instance_exec(&_1) }
+      end
+
+      def skip_execution!
+        @skip_execution = true
+      end
+
+      def skip_execution?
+        @skip_execution || false
       end
     end
 

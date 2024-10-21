@@ -27,7 +27,7 @@ module DearDirtyController
       @context = Context.new
       begin
         run_before_callbacks
-        body serialize(execute)
+        body serialize(execute) unless skip_execution?
         run_after_callbacks
       rescue => e
         try_rescue e
@@ -78,14 +78,6 @@ module DearDirtyController
       @context.messages << "after"
       puts "after"
       puts @context.messages.to_s
-    end
-
-    serialize do |response|
-      array = []
-      response.keys.each do |key|
-        array << "'#{key}': '#{response[key]}'"
-      end
-      "{#{array.join(", ")}}"
     end
   end
 

@@ -70,4 +70,31 @@ RSpec.describe DearDirtyController::Hook do
       expect(context.message).to eq "after"
     end
   end
+
+  describe "#skip_execution!" do
+    klass = Class.new do
+      include DearDirtyController::Hook
+    end
+
+    it "sets skip_execution true" do
+      instance = klass.new
+      expect(instance.send(:skip_execution)).to be_nil
+      instance.send(:skip_execution!)
+      expect(instance.send(:skip_execution)).to be true
+    end
+  end
+
+  describe "#skip_execution?" do
+    klass = Class.new do
+      include DearDirtyController::Hook
+    end
+
+    it "returns false by default" do
+      instance = klass.new
+      expect(instance.send(:skip_execution?)).to be false
+
+      instance.send(:skip_execution!)
+      expect(instance.send(:skip_execution?)).to be true
+    end
+  end
 end
