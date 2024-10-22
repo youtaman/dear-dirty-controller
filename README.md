@@ -1,35 +1,216 @@
-# Dear::Dirty::Controller
+# DearDirtyController
 
-TODO: Delete this and the text below, and describe your gem
+DearDirtyControllerは1つのcontrollerに1つのアクションを実装する方法を提供します。
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/dear/dirty/controller`. To experiment with that code, run `bin/console` for an interactive prompt.
+## Example of use in rails
+
+```ruby
+class GetUserController
+  include DearDirtyController::Mixin
+
+  before do
+    Rails.logger.info "[START] get user"
+  end
+
+  execute do
+    request = ActionDispatch::Request.new(@args)
+    params = ActionController::Parameters.new(request.params)
+    User.find(params[:id])
+  end
+
+  after do
+    Rails.logger.info "[END] get user"
+  end
+
+  serialize do |user|
+    {
+      user: {
+        last_name: user.last_name,
+        first_name: user.first_name,
+        name: user.name
+      }
+    }
+  end
+end
+```
+
+`DearDirtyController::Mixin`をincludeするだけなので、特定のcontrollerでのみ使用するという選択が可能です。
+上記はrailsでの使用例ですが、ApplicationControllerを継承する必要はありません。
+
+`before`, `execute`, `after`, `serialize`のうち必要なものにブロックを渡すだけでアクションを実装することができます。
+
+### Routing
+
+railsの通常のルーティングに`DearDirtyController::Mixin`をincludeしたクラスを渡すだけです。
+`namespace`や`scope`, `get`等は変わらずに使えますが、`resource`, `resources`は使用できない点に注意してください。
+
+この記載方法によりどのcontrollerに処理を実装されているのが明瞭であり、また、エディタのコードジャンプ等も使えるようになります。
+
+```ruby
+  scope :api do
+    get "/users/:id", to: GetUserController
+    post "users", to: PostUserController
+  end
+```
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+TBD
 
-Install the gem and add to the application's Gemfile by executing:
+## Documentation
 
-```bash
-bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+### usable instance variables
+
+| name | description |
+|---|---|
+| @args | .callに渡される引数の配列 |
+| @context | before, execute, after, serializeブロック内で共有可能な変数 |
+
+### execute
+
+```ruby
+class XxxController
+  include DearDirtyController::Mixin
+
+  execute do
+    # do anything
+  end
+end
 ```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+### before, after hook
 
-```bash
-gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+before hook内では`skip_execution!`メソッドを呼び出すことでexecuteブロックの実行をキャンセルできます。
+
+```ruby
+class XxxController
+  include DearDirtyController::Mixin
+
+  before do
+    @context.current_user = get_user_method
+    if @context.current_user.nil?
+      skip_execution!
+      body { message: "User not found" }
+      status 404
+    end
+  end
+
+  # implement anything
+
+  after do
+    if @context.success? # success? is set by execute block
+      MailSender.call
+    end
+  end
+end
 ```
 
-## Usage
+### serialize, serializer
 
-TODO: Write usage instructions here
+`serialize`, `serializer`を使用して`execute`の結果をserializeすることができます
+`serialize`と`serializer`が同時に使用されている場合、`serialize`に渡したブロックが優先されます。
+どちらも使用されていない場合、デフォルトで`.to_json`が呼び出されます。
 
-## Development
+```ruby
+class XxxSerializer
+  def self.serialize(user)
+    {
+      id: user.id,
+      name: user.name
+    }
+  end
+end
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+def XxxController
+  include DearDirtyController::Mixin
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+  serializer XxxSerializer, method: :serialize # method optionのデフォルト値は:call
 
-## License
+  serialize do |user|
+    {
+      id: user.id,
+      name: user.name
+    }
+  end
+end
+```
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+### rescue_from, rescue_all
+
+```ruby
+class XxxController
+  include DearDirtyController::Mixin
+
+  rescue_from ActiveRecord::RecordNotFound do |_error|
+    status 404
+    body "record not found"
+  end
+
+  rescue_all do |_error|
+    status 501
+    body "something went wrong"
+  end
+
+  execute do
+    user = User.find(-1) # raise ActiveRecord::RecordNotFound
+  end
+end
+```
+
+### headers, content_type, status, body
+
+`headers`, `content_type`, `status`, `body`メソッドを用いてレスポンスを設定することができます。
+`headers`, `content_type`, `status`はクラスメソッドも用意していますが、インスタンスメソッドが使用された場合はインスタンスメソッドに渡された値を優先します。
+
+```ruby
+class XxxController
+  include DearDirtyController::Mixin
+
+  headers { "X-SOME-KEY": "xxxx" }
+  content_type "Application/json"
+  status 200
+
+  before do
+    user = User.find_by(id: 1)
+  end
+
+  execute do
+    if user.present?
+      body { id: user.id, name: user.name }
+    else
+      status 404
+      body "user not found"
+    end
+  end
+end
+```
+
+## Tips for rails
+
+### request
+
+`@args`に格納されているActionDispatch::Routingから渡される引数をActionDispatch::Requestのインスタンスにすることで
+通常のApplicationControllerと同様にリクエストを扱うことができるようになります。
+この処理をBaseControllerとして定義することをお勧めします。
+
+```ruby
+class BaseController
+  include DearDirtyController::Mixin
+  attr_reader :request
+
+  def initialize(args)
+    super
+    @request = ActionDispatch::Request.new(args)
+  end
+
+  def params
+    ActionController::Parameters.new(request.params)
+  end
+end
+
+class XxxController < BaseController
+  execute do
+    User.find(params[:id])
+  end
+end
+```
