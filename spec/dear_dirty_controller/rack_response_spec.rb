@@ -21,6 +21,13 @@ RSpec.describe DearDirtyController::RackResponse do
     end
   end
 
+  describe ".status" do
+    it "sets status" do
+      klass.send(:status, 201)
+      expect(klass.send(:_status)).to eq 201
+    end
+  end
+
   describe "#headers" do
     it "sets headers" do
       instance = klass.new
@@ -34,6 +41,14 @@ RSpec.describe DearDirtyController::RackResponse do
       instance = klass.new
       instance.send(:content_type, "application/json")
       expect(instance.send(:_headers)).to eq({ "Content-Type" => "application/json" })
+    end
+  end
+
+  describe "#status" do
+    it "sets status" do
+      instance = klass.new
+      instance.send(:status, 201)
+      expect(instance.send(:_status)).to eq 201
     end
   end
 
@@ -72,6 +87,15 @@ RSpec.describe DearDirtyController::RackResponse do
 
       status_code, = instance.send(:build_rack_response)
       expect(status_code).to eq 200
+    end
+
+    it "prioritizes instance status over class status" do
+      klass.send(:status, 201)
+      instance = klass.new
+      instance.send(:status, 202)
+
+      status_code, = instance.send(:build_rack_response)
+      expect(status_code).to eq 202
     end
 
     it "defaults headers to empty hash" do

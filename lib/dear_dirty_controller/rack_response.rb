@@ -30,7 +30,7 @@ module DearDirtyController
       end
 
       def build_rack_response
-        status = @_status || 200
+        status = @_status || self.class._status || 200
         headers = (self.class._headers || {}).merge(@_headers || {})
         body = @_body.nil? ? [] : [@_body]
         [status, headers, body]
@@ -38,7 +38,7 @@ module DearDirtyController
     end
 
     module ClassMethods
-      attr_reader :_headers
+      attr_reader :_headers, :_status
 
       private
 
@@ -49,6 +49,10 @@ module DearDirtyController
       def content_type(param)
         @_headers ||= {}
         @_headers["Content-Type"] = param
+      end
+
+      def status(param)
+        @_status = param
       end
     end
   end
