@@ -4,7 +4,7 @@ class GetUserController < ApplicationController
   end
 
   # Behaves the same as `serialize UserSerializer`
-  serialize do
+  serialize do |user|
     {
       user: {
         last_name: user.last_name,
