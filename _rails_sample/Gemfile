@@ -18,3 +18,5 @@ group :development, :test do
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
 end
+
+gem "dear-dirty-controller", "0.1.0", require: "dear_dirty_controller"
