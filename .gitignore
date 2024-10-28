@@ -2,3 +2,4 @@ coverage
 Dockerfile
 docker-compose.yml
 .rspec_status
+memo
