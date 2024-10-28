@@ -33,7 +33,7 @@ module DearDirtyController
         status = @_status || self.class._status || 200
         headers = (self.class._headers || {}).merge(@_headers || {})
         body = @_body.nil? ? [] : [@_body]
-        [status, headers, body]
+        [status, headers, body.to_json]
       end
     end
 

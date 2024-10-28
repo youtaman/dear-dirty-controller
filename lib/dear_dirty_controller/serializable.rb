@@ -18,7 +18,7 @@ module DearDirtyController
         elsif self.class._serializer_class
           self.class._serializer_class.send(self.class._serialize_method, value)
         else
-          value.to_json
+          value
         end
       end
     end
