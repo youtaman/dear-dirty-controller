@@ -55,7 +55,18 @@ railsの通常のルーティングに`DearDirtyController::Mixin`をincludeし�
 
 ## Installation
 
-TBD
+Add this line to your application's Gemfile:
+
+```ruby
+gem "dear-dirty-controller", require: "dear_dirty_controller"
+```
+
+And then execute:
+
+```
+$ bundle install
+```
+
 
 ## Documentation
 
